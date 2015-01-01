@@ -139,7 +139,15 @@ public class SettingsManager {
         if (key_file != null) {
             try {
                 key_file.set_value (group, key, value);
-                key_file.save_to_file (GOFI.Utils.config_file);
+                
+                var file = File.new_for_path (GOFI.Utils.config_file);
+                var file_io_stream = 
+                    file.replace_readwrite (null, true, FileCreateFlags.NONE);
+                var stream_out = 
+                    new DataOutputStream (file_io_stream.output_stream);
+                
+                stream_out.put_string (key_file.to_data ());
+                
             } catch (Error e) {
                 error ("An error occured while setting the setting"
                     +" %s.%s to %s: %s", group, key, value, e.message);
