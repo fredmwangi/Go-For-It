@@ -29,11 +29,11 @@ class MainWindow : Gtk.ApplicationWindow {
     private Gtk.Grid main_layout;
     private Gtk.Stack activity_stack;
     private Gtk.StackSwitcher activity_switcher;
-    private Gtk.HeaderBar header_bar;
     private TaskList todo_list;
     private TaskList done_list;
     private TimerView timer_view;
-    private Gtk.ToggleToolButton menu_btn;
+    private Gtk.MenuBar menubar;
+    private Gtk.MenuItem menu_item;
     // Application Menu
     private Gtk.Menu app_menu;
     private Gtk.MenuItem clear_done_item;
@@ -69,6 +69,7 @@ class MainWindow : Gtk.ApplicationWindow {
     private void setup_window () {
         this.title = GOFI.APP_NAME;
         this.set_border_width (0);
+        this.has_resize_grip = false;
         this.set_position (Gtk.WindowPosition.CENTER);
         this.set_default_size (GOFI.DEFAULT_WIN_WIDTH, GOFI.DEFAULT_WIN_HEIGHT);
     }
@@ -79,21 +80,21 @@ class MainWindow : Gtk.ApplicationWindow {
     private void setup_widgets () {
         /* Instantiation of the Widgets */
         main_layout = new Gtk.Grid ();
-        header_bar = new Gtk.HeaderBar ();
+        menubar = new Gtk.MenuBar ();
+        menu_item = new Gtk.MenuItem.with_label ("Menu");
         activity_stack = new Gtk.Stack ();
         activity_switcher = new Gtk.StackSwitcher ();
         todo_list = new TaskList (this.task_manager.todo_store, true);
         done_list = new TaskList (this.task_manager.done_store, false);
         timer_view = new TimerView (task_timer);
-        // ToolButons and their corresponding images
-        var menu_img = GOFI.Utils.load_image_fallback (
-            Gtk.IconSize.LARGE_TOOLBAR, "open-menu", "open-menu-symbolic", 
-            "go-for-it-open-menu-fallback");
-        menu_btn = new Gtk.ToggleToolButton ();
         
         /* Widget Settings */
         // Main Layout
         main_layout.orientation = Gtk.Orientation.VERTICAL;
+        
+        // Menu Setup
+        menubar.add (menu_item);
+        menu_item.set_submenu (app_menu);
         
         // Activity Stack + Switcher
         activity_switcher.set_stack (activity_stack);
@@ -113,18 +114,6 @@ class MainWindow : Gtk.ApplicationWindow {
             timer_view.show ();
             activity_stack.set_visible_child_name ("timer");
         }
-            
-        // GTK Header Bar
-        header_bar.set_show_close_button (true);
-        header_bar.title = GOFI.APP_NAME;
-        this.set_titlebar (header_bar);
-        
-        // Headerbar Items
-        menu_btn.icon_widget = menu_img;
-        menu_btn.label_widget = new Gtk.Label ("Menu");
-        menu_btn.toggled.connect (menu_btn_toggled);
-        // Add headerbar Buttons here
-        header_bar.pack_end (menu_btn);
         
         /* Action and Signal Handling */
         todo_list.add_new_task.connect (task_manager.add_new_task);
@@ -143,6 +132,7 @@ class MainWindow : Gtk.ApplicationWindow {
         // Call once to refresh view on startup
         todo_selection_changed ();
         
+        main_layout.add (menubar);
         main_layout.add (activity_switcher);
         main_layout.add (activity_stack);
 
@@ -171,34 +161,6 @@ class MainWindow : Gtk.ApplicationWindow {
         var reference = new Gtk.TreeRowReference (model, path);
         task_timer.active_task = reference;
     }
-
-    private void menu_btn_toggled (Gtk.ToggleToolButton source) {
-        if (source.active) {
-            app_menu.popup (null, null, calc_menu_position, 0,
-                            Gtk.get_current_event_time ());
-            app_menu.select_first (true);
-        } else {
-            app_menu.popdown ();
-        }
-    }
-
-    private void calc_menu_position (Gtk.Menu menu, out int x, out int y) {
-        /* Get relevant position values */
-        int win_x, win_y;
-        this.get_position (out win_x, out win_y);
-        Gtk.Allocation btn_alloc, menu_alloc;
-        menu_btn.get_allocation (out btn_alloc);
-        app_menu.get_allocation (out menu_alloc);
-        
-        /*
-         * The menu located below the app menu button.
-         * Its right border is algined to the right side of the menu button,
-         * because the button is the rightmost element of the toolbar.
-         * This way the menu never overlaps the right side of the app's window.
-         */
-        x = win_x + btn_alloc.x - menu_alloc.width + btn_alloc.width;
-        y = win_y + btn_alloc.y + btn_alloc.height;
-    }
     
     private void setup_menu () {
         /* Initialization */
@@ -206,12 +168,6 @@ class MainWindow : Gtk.ApplicationWindow {
         clear_done_item = new Gtk.MenuItem.with_label ("Clear Done List");
         config_item = new Gtk.MenuItem.with_label ("Configuration");
         about_item = new Gtk.MenuItem.with_label ("About");
-        
-        /* Signal and Action Handling */
-        // Untoggle menu button, when menu is hidden
-        app_menu.hide.connect ((e) => {
-            menu_btn.active = false;
-        });
         
         clear_done_item.activate.connect ((e) => {
             task_manager.clear_done_store ();
@@ -246,28 +202,27 @@ class MainWindow : Gtk.ApplicationWindow {
 
     private void task_timer_activated (Gtk.TreeRowReference reference,
                                        bool break_active) {
-
         if (break_previously_active != break_active) {
             var task = GOFI.Utils.tree_row_ref_to_task (reference);
-            Notification notification;
+            WinNotification notification;
             if (break_active) {
-                notification = new Notification ("Take a Break");
-                notification.set_body ("Relax and stop thinking about your "
-                                       + "current task for a while :-)");
+                notification = new WinNotification("Take a Break",
+                    "Relax and stop thinking about your "
+                    + "current task for a while :-)");
             } else {
-                notification = new Notification ("The Break is Over");
-                notification.set_body ("Your next task is: " + task);
+                notification = new WinNotification ("The Break is Over",
+                    "Your next task is: " + task);
             }
-            application.send_notification (null, notification);
+            notification.send ();
         }
         break_previously_active = break_active;
     }
     
     private void display_almost_over_notification (DateTime remaining_time) {
         int64 secs = remaining_time.to_unix ();
-        var notification = new Notification ("Prepare for your break");
-        notification.set_body (@"You have $secs seconds left");
-        application.send_notification (null, notification);
+        var notification = new WinNotification ("Prepare for your break",
+            @"You have $secs seconds left");
+        notification.send ();
     }
     
     /**
