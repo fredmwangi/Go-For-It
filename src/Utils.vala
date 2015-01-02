@@ -32,10 +32,6 @@ namespace GOFI {
         "Dropbox/Todo", "Dropbox/todo"
     };
     
-    /* Numeric Values */
-    const int DEFAULT_WIN_WIDTH = 250;
-    const int DEFAULT_WIN_HEIGHT = 450;
-    
     /** 
      * A collection of static utility functions.
      */
