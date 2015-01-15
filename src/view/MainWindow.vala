@@ -264,7 +264,6 @@ class MainWindow : Gtk.ApplicationWindow {
             Notification notification;
             if (break_active) {
                 stick ();
-                show ();
                 move (396, 195);
                 present ();
                 set_keep_above (true);
