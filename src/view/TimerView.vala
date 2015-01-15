@@ -33,7 +33,7 @@ public class TimerView : Gtk.Grid {
     private Gtk.Grid action_grid;
     private Gtk.Grid action_timer_grid;
     private Gtk.Grid action_task_grid;
-    private Gtk.Button run_btn;
+    private Gtk.ToggleButton run_btn;
     private Gtk.Button skip_btn;
     private Gtk.Button done_btn;
     
@@ -94,14 +94,22 @@ public class TimerView : Gtk.Grid {
         if (running) {
             run_btn.label = "Pau_se";
             run_btn.get_style_context ().remove_class ("suggested-action");
-            run_btn.clicked.connect ((e) => {
-                timer.stop ();
+            run_btn.toggled.connect ((e) => {
+                if (run_btn.active) {
+                    timer.stop ();
+                }
             });
         } else {
             run_btn.label = "_Start";
             run_btn.get_style_context ().add_class ("suggested-action");
             run_btn.clicked.connect ((e) => {
-                timer.start ();
+                if (!run_btn.active) {
+                    timer.start ();
+                    if(task_status_lbl.label != "Take a Break!"){
+                        var parent = get_toplevel();
+                        parent.hide ();    
+                    }
+                }
             });
         }
     }
@@ -204,7 +212,7 @@ public class TimerView : Gtk.Grid {
         action_grid = new Gtk.Grid ();
         action_timer_grid = new Gtk.Grid ();
         action_task_grid = new Gtk.Grid ();
-        run_btn = new Gtk.Button ();
+        run_btn = new Gtk.ToggleButton ();
         skip_btn = new Gtk.Button.with_label ("_Skip");
         done_btn = new Gtk.Button.with_label ("_Done");
         
@@ -234,6 +242,7 @@ public class TimerView : Gtk.Grid {
         /* Add Widgets */
         action_timer_grid.add (skip_btn);
         action_timer_grid.add (run_btn);
+        run_btn.set_active (true);
         action_task_grid.add (done_btn);
         action_grid.add (action_task_grid);
         action_grid.add (action_timer_grid);
