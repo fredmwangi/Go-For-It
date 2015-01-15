@@ -263,6 +263,7 @@ class MainWindow : Gtk.ApplicationWindow {
             var task = GOFI.Utils.tree_row_ref_to_task (reference);
             Notification notification;
             if (break_active) {
+                stick ();
                 show ();
                 move (396, 195);
                 present ();
