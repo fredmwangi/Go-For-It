@@ -268,6 +268,11 @@ class MainWindow : Gtk.ApplicationWindow {
                 move (396, 195);
                 present ();
                 set_keep_above (true);
+                try {
+                    Process.spawn_command_line_async ("xdotool key XF86AudioPlay");
+                    } catch (SpawnError e) {
+                        stdout.printf ("Error: %s\n", e.message);
+                    }
                 notification = new Notification ("Take a Break");
                 notification.set_body ("Relax and stop thinking about your "
                                        + "current task for a while :-)");
