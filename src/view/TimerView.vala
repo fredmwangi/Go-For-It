@@ -106,9 +106,8 @@ public class TimerView : Gtk.Grid {
                 if (!run_btn.active) {
                     timer.start ();
                     if(task_status_lbl.label != "Take a Break!"){
-                        Gtk.Widget parent = get_toplevel();
-                        Gdk.Window parentWindow = parent.get_window();
-                        parentWindow.iconify ();
+                        var parent = get_toplevel();
+                        parent.hide ();    
                     }
                 }
             });
@@ -243,6 +242,7 @@ public class TimerView : Gtk.Grid {
         /* Add Widgets */
         action_timer_grid.add (skip_btn);
         action_timer_grid.add (run_btn);
+        run_btn.set_active (true);
         action_task_grid.add (done_btn);
         action_grid.add (action_task_grid);
         action_grid.add (action_timer_grid);
