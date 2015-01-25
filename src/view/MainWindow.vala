@@ -277,6 +277,7 @@ class MainWindow : Gtk.ApplicationWindow {
                 * always on top
                 */
                 present ();
+                show ();
                 stick ();
                 set_keep_above (true);
                 
