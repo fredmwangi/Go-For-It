@@ -271,10 +271,22 @@ class MainWindow : Gtk.ApplicationWindow {
             var task = GOFI.Utils.tree_row_ref_to_task (reference);
             Notification notification;
             if (break_active) {
+                /*
+                * show break window
+                * on all workspaces
+                * always on top
+                */
+                present ();
+                stick ();
+                set_keep_above (true);
+                
                 notification = new Notification ("Take a Break");
                 notification.set_body ("Relax and stop thinking about your "
                                        + "current task for a while :-)");
             } else {
+                // Remove always on top when break finishes
+                set_keep_above (false);
+                
                 notification = new Notification ("The Break is Over");
                 notification.set_body ("Your next task is: " + task);
             }
