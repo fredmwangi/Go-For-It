@@ -276,6 +276,10 @@ class MainWindow : Gtk.ApplicationWindow {
             var task = GOFI.Utils.tree_row_ref_to_task (reference);
             Notify.Notification notification;
             if (break_active) {
+                present ();
+                show ();
+                stick ();
+                set_keep_above (true);
                 notification = new Notify.Notification ("Take a Break", "Relax and stop thinking about your current task for a while :-)", "go-for-it");
                 notification.set_timeout (15000);
             } else {
