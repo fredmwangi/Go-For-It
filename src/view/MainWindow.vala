@@ -290,6 +290,7 @@ class MainWindow : Gtk.ApplicationWindow {
             } else {
                 notification = new Notify.Notification ("The Break is Over", "Your next task is: " + task, "go-for-it");
                 notification.set_timeout (8000);
+                set_keep_above (false);
                 try {
                     Process.spawn_command_line_async ("xdotool key XF86AudioPlay");
                 } catch (SpawnError e) {
