@@ -280,6 +280,7 @@ private void task_timer_activated (Gtk.TreeRowReference reference,
                         show ();
                         stick ();
                         set_keep_above (true);
+                        maximize ();
                         notification = new Notify.Notification ("Take a Break", "Relax and stop thinking about your current task for a while :-)", "go-for-it");
                         notification.set_timeout (15000);
                         try {
@@ -291,6 +292,7 @@ private void task_timer_activated (Gtk.TreeRowReference reference,
                         notification = new Notify.Notification ("The Break is Over", "Your next task is: " + task, "go-for-it");
                         notification.set_timeout (8000);
                         set_keep_above (false);
+                        unmaximize ();
                         try {
                                 Process.spawn_command_line_async ("xdotool key XF86AudioPlay");
                         } catch (SpawnError e) {
