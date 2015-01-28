@@ -96,6 +96,7 @@ public void set_running (bool running) {
         if (running) {
                 run_btn.label = "Pau_se";
                 run_btn.get_style_context ().remove_class ("suggested-action");
+                run_btn.set_active (true);
         } else {
                 run_btn.label = "_Start";
                 run_btn.get_style_context ().add_class ("suggested-action");
