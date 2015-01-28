@@ -99,6 +99,7 @@ public void set_running (bool running) {
         } else {
                 run_btn.label = "_Start";
                 run_btn.get_style_context ().add_class ("suggested-action");
+                run_btn.set_active (false);
         }
 
         run_btn.toggled.connect (() => {
